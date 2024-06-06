@@ -14,7 +14,7 @@
     <dependencies>
         <dependency>
             <groupId>edu.upvictoria.fpoo</groupId>
-            <artifactId>sql_interpreter</artifactId>
+            <artifactId>database_manager</artifactId>
             <version>1.0</version>
         </dependency>
 
