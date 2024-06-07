@@ -8,7 +8,8 @@ import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import java.io.IOException;
 
-import edu.upvictoria.fpoo.*;
+// import edu.upvictoria.fpoo.*;
+// import java.util.List;
 
 /**
  * JavaFX App
@@ -25,8 +26,6 @@ public class App extends Application {
     }
 
     public static void main(String[] args) {
-        String query = "SELECT * from example;";
-        // Lexer lexer = new Lexer(query);
         launch();
     }
 

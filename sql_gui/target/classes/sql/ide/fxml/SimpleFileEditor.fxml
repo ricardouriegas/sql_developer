@@ -16,13 +16,17 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sql.ide.controllers.FileEditorController">
     <top>
-        <MenuBar>
-            <Menu text="File">
-                <MenuItem onAction="#openFile" text="Open" />
-                <MenuItem onAction="#saveFile" text="Save" />
-                <MenuItem text="Close" />
-            </Menu>
-        </MenuBar>
+        <HBox>
+            <MenuBar HBox.hgrow="ALWAYS">
+                <Menu text="File">
+                    <MenuItem onAction="#openFile" text="Open" />
+                    <MenuItem onAction="#saveFile" text="Save" />
+                    <MenuItem onAction="#exitApplication" text="Close" />
+                </Menu>
+            </MenuBar>
+            <Button fx:id="runFileButton" onAction="#runFile" text="Run File" styleClass="button-run" />
+            <Button fx:id="runQueryButton" onAction="#runQuery" text="Run Query" styleClass="button-run" />
+        </HBox>
     </top>
     <center>
         <AnchorPane>

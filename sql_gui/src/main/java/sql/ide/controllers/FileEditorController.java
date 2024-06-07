@@ -138,11 +138,23 @@ public class FileEditorController {
 
     public void loadChanges(ActionEvent event) {
         loadFileToTextArea(loadedFileReference);
-        loadChangesButton.setVisible(true);
+        loadChangesButton.setVisible(false);
     }
 
     public void saveFile(ActionEvent event) {
         try {
+            if (loadedFileReference == null) {
+                // if no file is loaded, save as new file
+                FileChooser fileChooser = new FileChooser();
+                fileChooser.getExtensionFilters().add(
+                        new FileChooser.ExtensionFilter("SQL Files", "*.sql", "*.txt"));
+                fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+                File fileToSave = fileChooser.showSaveDialog(null);
+                if (fileToSave == null)
+                    return;
+                loadedFileReference = fileToSave;
+
+            }
             FileWriter myWriter = new FileWriter(loadedFileReference);
             myWriter.write(textArea.getText());
             myWriter.close();
@@ -152,5 +164,31 @@ public class FileEditorController {
             // Logger.getLogger(getClass().getName()).log(SEVERE, null, e);
             System.out.println("An error occurred while saving the file.");
         }
+    }
+
+    public void closeFile(ActionEvent event) {
+        textArea.clear();
+        statusMessage.setText("No file loaded");
+        loadedFileReference = null;
+        loadChangesButton.setVisible(false);
+    }
+
+    public void exitApplication(ActionEvent event) {
+        // TODO: verify if file is saved before exiting
+        System.exit(0);
+    }
+
+    /**
+     * TODO: Run query
+     */
+    public void runQuery(ActionEvent event) {
+        System.out.println("Running query...");
+    }
+
+    /**
+     * TODO: Run file
+     */
+    public void runFile(ActionEvent event) {
+        System.out.println("Running file...");
     }
 }
