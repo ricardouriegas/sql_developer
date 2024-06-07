@@ -21,7 +21,8 @@
                 <Menu text="File">
                     <MenuItem onAction="#openFile" text="Open" />
                     <MenuItem onAction="#saveFile" text="Save" />
-                    <MenuItem onAction="#exitApplication" text="Close" />
+                    <MenuItem onAction="#closeFile" text="Close" />
+                    <MenuItem onAction="#exitApplication" text="Exit" />
                 </Menu>
             </MenuBar>
             <Button fx:id="runFileButton" onAction="#runFile" text="Run File" styleClass="button-run" />
@@ -30,7 +31,7 @@
     </top>
     <center>
         <AnchorPane>
-            <TextArea fx:id="textArea" prefHeight="400.0" prefWidth="600.0" text="Load a text file using the menu" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" />
+            <TextArea fx:id="textArea" prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" />
         </AnchorPane>
     </center>
     <bottom>
@@ -42,6 +43,9 @@
                 <HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS" visible="false">
                     <Label fx:id="statusMessage" prefWidth="150.0" text="Checking for Changes..." />
                     <ProgressBar fx:id="progressBar" prefWidth="150.0" progress="0.0" />
+                </HBox>
+                <HBox alignment="CENTER" HBox.hgrow="ALWAYS">
+                    <Label fx:id="feedback" text="" />
                 </HBox>
                 <HBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
                     <Button fx:id="loadChangesButton" onAction="#loadChanges" text="Load Changes" />

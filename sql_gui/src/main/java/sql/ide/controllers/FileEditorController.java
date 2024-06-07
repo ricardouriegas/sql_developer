@@ -3,6 +3,7 @@ package sql.ide.controllers;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
@@ -18,18 +19,32 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 // import static java.util.logging.Level.SEVERE;
 
+//? Import everything related to database classes
+import edu.upvictoria.fpoo.*;
+import java.util.List;
+
 public class FileEditorController {
+    // declare a "global" interpreter
+    Interpreter interpreter = new Interpreter();
+
     private File loadedFileReference;
     private FileTime lastModifiedTime;
     public Label statusMessage;
     public ProgressBar progressBar;
     public Button loadChangesButton;
     public TextArea textArea;
+    public Label feedback;
 
+    
     public void initialize() {
-        loadChangesButton.setVisible(false);
+        loadChangesButton.setVisible(false); // hide load changes button
+        textArea.setPromptText("SQL code goes here..."); // placeholder text
     }
 
+    /**
+     * Open file chooser dialog to select file to open
+     * @param event
+     */
     public void openFile(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
         // only allow text files to be selected using chooser
@@ -45,12 +60,21 @@ public class FileEditorController {
         }
     }
 
+    /**
+     * Load file to text area
+     * @param fileToLoad
+     */
     private void loadFileToTextArea(File fileToLoad) {
         Task<String> loadTask = fileLoaderTask(fileToLoad);
         progressBar.progressProperty().bind(loadTask.progressProperty());
         loadTask.run();
     }
 
+    /**
+     * Load file to text area asynchronously
+     * @param fileToLoad
+     * @return
+     */
     private Task<String> fileLoaderTask(File fileToLoad) {
         // Create a task to load the file asynchronously
         Task<String> loadFileTask = new Task<>() {
@@ -99,6 +123,10 @@ public class FileEditorController {
         return loadFileTask;
     }
 
+    /**
+     * Schedule file checking service, to check for changes in file
+     * @param file
+     */
     private void scheduleFileChecking(File file) {
         ScheduledService<Boolean> fileChangeCheckingService = createFileChangesCheckingService(file);
         fileChangeCheckingService.setOnSucceeded(workerStateEvent -> {
@@ -114,6 +142,11 @@ public class FileEditorController {
         fileChangeCheckingService.start();
     }
 
+    /**
+     * Create file changes checking service, to check for changes in file
+     * @param file
+     * @return
+     */
     private ScheduledService<Boolean> createFileChangesCheckingService(File file) {
         ScheduledService<Boolean> scheduledService = new ScheduledService<>() {
             @Override
@@ -132,15 +165,26 @@ public class FileEditorController {
         return scheduledService;
     }
 
+    /**
+     * Notify user of changes in file, activate load changes button
+     */
     private void notifyUserOfChanges() {
         loadChangesButton.setVisible(true);
     }
 
+    /**
+     * Load changes from file, when user clicks load changes button
+     * @param event
+     */
     public void loadChanges(ActionEvent event) {
         loadFileToTextArea(loadedFileReference);
         loadChangesButton.setVisible(false);
     }
 
+    /**
+     * Save file to disk
+     * @param event
+     */
     public void saveFile(ActionEvent event) {
         try {
             if (loadedFileReference == null) {
@@ -166,29 +210,119 @@ public class FileEditorController {
         }
     }
 
+    /**
+     * Close file, clear text area and feedback that everything is cleared
+     * @param event
+     */
     public void closeFile(ActionEvent event) {
         textArea.clear();
-        statusMessage.setText("No file loaded");
+        feedback.setText("Everything is cleared.");        
         loadedFileReference = null;
         loadChangesButton.setVisible(false);
     }
 
+    /**
+     * Exit application
+     * @param event
+     */
     public void exitApplication(ActionEvent event) {
         // TODO: verify if file is saved before exiting
         System.exit(0);
     }
 
     /**
-     * TODO: Run query
+     * Run selected query
+     * @param event
      */
     public void runQuery(ActionEvent event) {
-        System.out.println("Running query...");
+        // get selected text
+        String selectedText = textArea.getSelectedText();
+
+        // verify if text is empty (no query selected)
+        if (selectedText.isEmpty()) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText("No query selected");
+            alert.setContentText("Please select a query to run.");
+            alert.showAndWait();
+        } else {
+            System.out.println("Selected text: " + selectedText);
+            try {
+                // lexer
+                Lexer lexer = new Lexer(selectedText);
+                List<Token> tokens = lexer.scanTokens();
+                
+                // parser
+                Parser parser = new Parser(tokens);
+                List<Clause> expressions = parser.parse();
+    
+                // interpreter
+                for (Clause expression : expressions) {
+                    interpreter.interpret(expression);
+                }
+            } catch (Error e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("An error occurred");
+                alert.setContentText(e.getMessage());
+                alert.showAndWait();
+            } catch (Exception e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("An error occurred");
+                alert.setContentText("Something went wrong.");
+                alert.showAndWait();
+            }
+            
+        }
     }
 
     /**
-     * TODO: Run file
+     * Run all queries in text area
+     * @param event
      */
     public void runFile(ActionEvent event) {
-        System.out.println("Running file...");
+        // get all text
+        String allText = textArea.getText();
+
+        // verify if text is empty (no query selected)
+        if (allText.isEmpty()) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText("No query selected");
+            alert.setContentText("Please select a query to run.");
+            alert.showAndWait();
+        } else {
+            System.out.println("All text: " + allText);
+            try {
+                // lexer
+                Lexer lexer = new Lexer(allText);
+                List<Token> tokens = lexer.scanTokens();
+                
+                // parser
+                Parser parser = new Parser(tokens);
+                List<Clause> expressions = parser.parse();
+    
+                // interpreter
+                for (Clause expression : expressions) {
+                    System.out.println("Excecuting: " + expression.accept(new AstPrinter()));
+                    interpreter.interpret(expression);
+                    System.out.println();
+                }
+            } catch (Error e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("An error occurred");
+                alert.setContentText(e.getMessage());
+                alert.showAndWait();
+            } catch (Exception e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("An error occurred");
+                alert.setContentText("Something went wrong.");
+                alert.showAndWait();
+            }
+            
+        }
     }
 }
