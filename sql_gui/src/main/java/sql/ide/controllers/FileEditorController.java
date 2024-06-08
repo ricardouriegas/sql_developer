@@ -29,8 +29,12 @@ public class FileEditorController {
 
     private File loadedFileReference;
     private FileTime lastModifiedTime;
+
     @FXML
     private TreeView<String> treeView;
+
+    @FXML
+    private TextArea resultArea = new TextArea();
 
     public Label statusMessage;
     public ProgressBar progressBar;
@@ -243,7 +247,7 @@ public class FileEditorController {
     }
 
     /**
-     * Run selected query
+     * Run user's selected query
      * 
      * @param event
      */
@@ -272,8 +276,13 @@ public class FileEditorController {
                 // interpreter
                 for (Clause expression : expressions) {
                     interpreter.interpret(expression);
+                    resultArea.appendText("Excecuting: " + expression.accept(new AstPrinter()) + "\n");
+                    resultArea.appendText(interpreter.getResult());
+                    resultArea.appendText("\n-----------------\n");
                 }
-            } catch (Error e) {
+
+            } 
+            catch (Error e) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Error");
                 alert.setHeaderText("An error occurred");
@@ -292,7 +301,6 @@ public class FileEditorController {
 
     /**
      * Run all queries in text area
-     * 
      * @param event
      */
     public void runFile(ActionEvent event) {
@@ -307,7 +315,6 @@ public class FileEditorController {
             alert.setContentText("Please select a query to run.");
             alert.showAndWait();
         } else {
-            System.out.println("All text: " + allText);
             try {
                 // lexer
                 Lexer lexer = new Lexer(allText);
@@ -321,8 +328,10 @@ public class FileEditorController {
                 for (Clause expression : expressions) {
                     System.out.println("Excecuting: " + expression.accept(new AstPrinter()));
                     interpreter.interpret(expression);
-                    System.out.println();
+                    resultArea.appendText("Excecuting: " + expression.accept(new AstPrinter()) + "\n");
+                    resultArea.appendText("-----------------\n");
                 }
+                resultArea.setText(interpreter.getResult());
             } catch (Error e) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Error");
@@ -344,10 +353,7 @@ public class FileEditorController {
     /* Tree View related methods */
     /****************************************************************/
     /**
-     * Tree view of the DataBase
-     * TODO: this class should be updating all the time
-     * it should show the current state of the database
-     * (interpreter.getDataBase()) have the database path
+     * TODO: the tree should be updating all the time using threads
      */
     public void updateTree() {
         Path path = interpreter.getDataBase();
