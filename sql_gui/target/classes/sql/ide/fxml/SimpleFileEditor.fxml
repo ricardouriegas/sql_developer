@@ -24,6 +24,24 @@
                     <MenuItem onAction="#closeFile" text="Close" />
                     <MenuItem onAction="#exitApplication" text="Exit" />
                 </Menu>
+                <!-- TODO: everything that is in comment should be added -->
+                <!-- <Menu text="Edit">
+                    <MenuItem onAction="#undo" text="Undo" />
+                    <MenuItem onAction="#redo" text="Redo" />
+                    <MenuItem onAction="#cut" text="Cut" />
+                    <MenuItem onAction="#copy" text="Copy" />
+                    <MenuItem onAction="#paste" text="Paste" />
+                    <MenuItem onAction="#selectAll" text="Select All" />
+                </Menu> -->
+                <Menu text="View">
+                    <!-- <MenuItem onAction="#toggleResult" text="Toggle Result" />
+                    <MenuItem onAction="#toggleTree" text="Toggle Tree" /> -->
+                    <MenuItem onAction="#updateTree" text="Update Tree View" />
+                </Menu>
+                <Menu text="Database Connection">
+                    <MenuItem onAction="#setDatabase" text="Choose a Database" />
+                </Menu>
+                
             </MenuBar>
             <Button fx:id="runFileButton" onAction="#runFile" text="Run File" styleClass="button-run" />
             <Button fx:id="runQueryButton" onAction="#runQuery" text="Run Query" styleClass="button-run" />
@@ -57,6 +75,6 @@
         </VBox>
     </bottom>
    <left>
-      <TreeView prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+        <TreeView fx:id="treeView" prefHeight="400.0" prefWidth="200.0" />
    </left>
 </BorderPane>

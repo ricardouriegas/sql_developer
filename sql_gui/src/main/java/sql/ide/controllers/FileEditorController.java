@@ -3,15 +3,15 @@ package sql.ide.controllers;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ProgressBar;
-import javafx.scene.control.TextArea;
+import javafx.fxml.FXML;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.util.concurrent.ExecutionException;
@@ -29,13 +29,16 @@ public class FileEditorController {
 
     private File loadedFileReference;
     private FileTime lastModifiedTime;
+    @FXML
+    private TreeView<String> treeView;
+
     public Label statusMessage;
     public ProgressBar progressBar;
     public Button loadChangesButton;
     public TextArea textArea;
     public Label feedback;
+    public Path folder;
 
-    
     public void initialize() {
         loadChangesButton.setVisible(false); // hide load changes button
         textArea.setPromptText("SQL code goes here..."); // placeholder text
@@ -43,6 +46,7 @@ public class FileEditorController {
 
     /**
      * Open file chooser dialog to select file to open
+     * 
      * @param event
      */
     public void openFile(ActionEvent event) {
@@ -62,6 +66,7 @@ public class FileEditorController {
 
     /**
      * Load file to text area
+     * 
      * @param fileToLoad
      */
     private void loadFileToTextArea(File fileToLoad) {
@@ -72,6 +77,7 @@ public class FileEditorController {
 
     /**
      * Load file to text area asynchronously
+     * 
      * @param fileToLoad
      * @return
      */
@@ -125,6 +131,7 @@ public class FileEditorController {
 
     /**
      * Schedule file checking service, to check for changes in file
+     * 
      * @param file
      */
     private void scheduleFileChecking(File file) {
@@ -144,6 +151,7 @@ public class FileEditorController {
 
     /**
      * Create file changes checking service, to check for changes in file
+     * 
      * @param file
      * @return
      */
@@ -174,6 +182,7 @@ public class FileEditorController {
 
     /**
      * Load changes from file, when user clicks load changes button
+     * 
      * @param event
      */
     public void loadChanges(ActionEvent event) {
@@ -183,6 +192,7 @@ public class FileEditorController {
 
     /**
      * Save file to disk
+     * 
      * @param event
      */
     public void saveFile(ActionEvent event) {
@@ -212,17 +222,19 @@ public class FileEditorController {
 
     /**
      * Close file, clear text area and feedback that everything is cleared
+     * 
      * @param event
      */
     public void closeFile(ActionEvent event) {
         textArea.clear();
-        feedback.setText("Everything is cleared.");        
+        feedback.setText("Everything is cleared.");
         loadedFileReference = null;
         loadChangesButton.setVisible(false);
     }
 
     /**
      * Exit application
+     * 
      * @param event
      */
     public void exitApplication(ActionEvent event) {
@@ -232,6 +244,7 @@ public class FileEditorController {
 
     /**
      * Run selected query
+     * 
      * @param event
      */
     public void runQuery(ActionEvent event) {
@@ -251,11 +264,11 @@ public class FileEditorController {
                 // lexer
                 Lexer lexer = new Lexer(selectedText);
                 List<Token> tokens = lexer.scanTokens();
-                
+
                 // parser
                 Parser parser = new Parser(tokens);
                 List<Clause> expressions = parser.parse();
-    
+
                 // interpreter
                 for (Clause expression : expressions) {
                     interpreter.interpret(expression);
@@ -273,12 +286,13 @@ public class FileEditorController {
                 alert.setContentText("Something went wrong.");
                 alert.showAndWait();
             }
-            
+
         }
     }
 
     /**
      * Run all queries in text area
+     * 
      * @param event
      */
     public void runFile(ActionEvent event) {
@@ -298,11 +312,11 @@ public class FileEditorController {
                 // lexer
                 Lexer lexer = new Lexer(allText);
                 List<Token> tokens = lexer.scanTokens();
-                
+
                 // parser
                 Parser parser = new Parser(tokens);
                 List<Clause> expressions = parser.parse();
-    
+
                 // interpreter
                 for (Clause expression : expressions) {
                     System.out.println("Excecuting: " + expression.accept(new AstPrinter()));
@@ -322,7 +336,84 @@ public class FileEditorController {
                 alert.setContentText("Something went wrong.");
                 alert.showAndWait();
             }
-            
+
         }
+    }
+
+    /****************************************************************/
+    /* Tree View related methods */
+    /****************************************************************/
+    /**
+     * Tree view of the DataBase
+     * TODO: this class should be updating all the time
+     * it should show the current state of the database
+     * (interpreter.getDataBase()) have the database path
+     */
+    public void updateTree() {
+        Path path = interpreter.getDataBase();
+        if (path != null) {
+            try (Stream<Path> paths = Files.walk(path, 1)) {
+                // filter the paths to only get the csv files
+                List<String> csvFiles = paths.filter(Files::isRegularFile)
+                        .filter(p -> p.getFileName().toString().endsWith(".csv"))
+                        .map(p -> p.getFileName().toString()).toList();
+
+                // create a new tree item to hold the csv files
+                TreeItem<String> root = new TreeItem<>(path.toString());
+                root.setExpanded(true);
+                
+                // read the first line of every csv file to get the columns
+                for (String csvFile : csvFiles) {
+                    try (BufferedReader reader = new BufferedReader(new FileReader(path.toString() + "/" + csvFile))) {
+                        String line = reader.readLine();
+                        String[] columns = line.split(",");
+                        TreeItem<String> item = new TreeItem<>(csvFile);
+                        for (String column : columns) {
+                            item.getChildren().add(new TreeItem<>(column));
+                        }
+                        root.getChildren().add(item);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                
+                // create a new tree view bc the old one is immutable
+                TreeView<String> newTreeView = new TreeView<>(root);
+
+                // set the new tree view
+                treeView.setRoot(newTreeView.getRoot());
+                treeView.setShowRoot(true);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            treeView.setRoot(null);
+            treeView.setShowRoot(false);
+        }
+    }
+
+    /***************************************************************************
+     * Set DataBase Menu
+     ***************************************************************************/
+    public void setDatabase(ActionEvent event) {
+        Path path = null;
+
+        // open folder chooser
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        directoryChooser.setTitle("Select Database Folder");
+        File selectedDirectory = directoryChooser.showDialog(null);
+
+        if (selectedDirectory != null) {
+            path = selectedDirectory.toPath();
+        }
+
+        interpreter.setDataBase(path);
+
+        // update tree view
+        updateTree();
+
+        // update the feedback
+        feedback.setText("Database connection successful.");
     }
 }
