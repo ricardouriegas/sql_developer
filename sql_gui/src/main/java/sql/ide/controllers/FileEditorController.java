@@ -24,6 +24,8 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
@@ -70,14 +72,17 @@ public class FileEditorController {
                 Thread.sleep(500);
                 String text = codeArea.getText();
                 Platform.runLater(() -> {
+                    // Platform.runLater(() -> {}) se utiliza para ejecutar una 
+                    // tarea en el hilo de aplicación de JavaFX 
+                    // en un momento futuro no especificado
                     StyleSpans<Collection<String>> spans = computeHighlighting(text);
                     if (spans != null)
                         codeArea.setStyleSpans(0, spans);
                 });
             } catch (Exception e) {
-                // e.printStackTrace();
+                e.printStackTrace();
             } catch (Error e) {
-                // e.printStackTrace();
+                e.printStackTrace();
             }
         }
     });
@@ -118,7 +123,7 @@ public class FileEditorController {
                 case LEFT_PAREN, RIGHT_PAREN, COMMA, MINUS, PLUS, SLASH, STAR, SEMICOLON, MOD, DIV, UCASE, LCASE,
                         CAPITALIZE, FLOOR, ROUND, RAND, COUNT, DISTINCT, MIN, MAX, SUM, AVG, CEIL -> "operator";
                 case BANG_EQUAL, BANG, EQUAL_EQUAL, EQUAL, PORCENTAJE, LESS_EQUAL, LESS, GREATER_EQUAL, GREATER -> "operator";
-                case SHOW, TABLES -> "others";
+                case SHOW, TABLES -> "keyword";
                 default -> "default";
             };
 

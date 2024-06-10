@@ -5,7 +5,7 @@
 }
 
 .data-type {
-    -fx-fill: rgb(255, 102, 0);
+    -fx-fill: rgb(255, 94, 0);
 }
 
 .ddl {
@@ -26,10 +26,6 @@
     -fx-fill: red;
 }
 
-.others {
-    -fx-fill: blue;
-}
-
 .default {
     -fx-fill: black;
 }
@@ -38,3 +34,25 @@
 /* .root {
     -fx-background-color: linear-gradient(to right, rgb(104, 63, 218), rgb(166, 51, 211));
 } */
+
+.root {
+    -fx-background-color: linear-gradient(to right, rgb(241, 252, 255), rgb(225, 241, 252));
+    -fx-text-fill: white;
+}
+
+.code-area {
+    -fx-background-color: transparent;
+    -fx-text-fill: black;
+}
+    
+.transparent-hbox {
+    -fx-background-color: transparent;
+}
+
+.vbox {
+    -fx-background-color: transparent;
+}
+
+.menu-bar {
+    -fx-background-color: transparent;
+}

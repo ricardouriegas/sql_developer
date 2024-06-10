@@ -1,22 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Menu?>
-<?import javafx.scene.control.MenuBar?>
-<?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.ProgressBar?>
-<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.*?>
 <?import javafx.scene.text.TextFlow?>
-<?import javafx.scene.control.TreeView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import org.fxmisc.richtext.CodeArea?>
 
-<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sql.ide.controllers.FileEditorController">
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="sql.ide.controllers.FileEditorController">
     <top>
         <HBox>
             <MenuBar HBox.hgrow="ALWAYS">
@@ -43,17 +37,26 @@
                 <Menu text="Database Connection">
                     <MenuItem onAction="#setDatabase" text="Choose a Database" />
                 </Menu>
-                
+                <Menu>
+                    <MenuItem onAction="#setDatabase" text="" />
+                </Menu>
+
             </MenuBar>
-            <Button fx:id="runFileButton" onAction="#runFile" text="Run File" styleClass="button-run" />
-            <Button fx:id="runQueryButton" onAction="#runQuery" text="Run Query" styleClass="button-run" />
+            <Button fx:id="runFileButton" onAction="#runFile" text="Run File"
+                styleClass="button-run" />
+            <Button fx:id="runQueryButton" onAction="#runQuery" text="Run Query"
+                styleClass="button-run" />
         </HBox>
     </top>
     <center>
         <AnchorPane>
-            <!-- <TextArea fx:id="textArea" prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" /> -->
+            <!-- <TextArea fx:id="textArea" prefHeight="400.0" prefWidth="600.0"
+            AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0"
+            AnchorPane.topAnchor="5.0" /> -->
             <!-- Codeare -->
-            <CodeArea fx:id="codeArea" prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" />
+            <CodeArea fx:id="codeArea" prefHeight="400.0" prefWidth="600.0"
+                AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0"
+                AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" />
         </AnchorPane>
     </center>
     <bottom>
@@ -74,11 +77,12 @@
                 </HBox>
             </HBox>
             <VBox fx:id="resultContainer" visible="true">
-                <TextArea fx:id="resultArea" promptText="Result will be shown here..." editable="false" wrapText="true" prefHeight="200"/>
+                <TextArea fx:id="resultArea" promptText="Result will be shown here..."
+                    editable="false" wrapText="true" prefHeight="200" styleClass="transparent-hbox" />
             </VBox>
         </VBox>
     </bottom>
-   <left>
-        <TreeView fx:id="treeView" prefHeight="400.0" prefWidth="200.0" />
-   </left>
+    <left>
+        <TreeView fx:id="treeView" prefHeight="400.0" prefWidth="200.0" styleClass="transparent-hbox"/>
+    </left>
 </BorderPane>
