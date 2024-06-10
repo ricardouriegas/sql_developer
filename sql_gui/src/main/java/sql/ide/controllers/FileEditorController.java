@@ -9,23 +9,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Stream;
-
-import org.fxmisc.richtext.CodeArea;
-import org.fxmisc.richtext.LineNumberFactory;
-import org.fxmisc.richtext.model.StyleSpans;
-import org.fxmisc.richtext.model.StyleSpansBuilder;
-
-// import javafx.scene.control.RichTextFX;
-// import org.fxmisc.richtext.model.Selection;
-
-//* Import everything related to database manager
-import edu.upvictoria.fpoo.*;
 import javafx.application.Platform;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
@@ -40,7 +26,16 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
-import javafx.util.Duration;
+
+
+//* richtext imports
+import org.fxmisc.richtext.CodeArea;
+import org.fxmisc.richtext.LineNumberFactory;
+import org.fxmisc.richtext.model.StyleSpans;
+import org.fxmisc.richtext.model.StyleSpansBuilder;
+
+//* Import everything related to database manager
+import edu.upvictoria.fpoo.*;
 
 public class FileEditorController {
     // Database manager dependency
@@ -62,30 +57,8 @@ public class FileEditorController {
     public Label statusMessage;
     public ProgressBar progressBar;
     public Button loadChangesButton;
-    // public TextArea textArea;
+    //// public TextArea textArea;  // deprecated bc of codeArea
     public Label feedback;
-    public Path folder;
-    public Path oldFolder;
-
-    /**
-     * Thread to check for folder path changes
-     */
-    Thread folderThread = new Thread(() -> {
-        while (true) {
-            try {
-                Thread.sleep(500);
-                if (folder != oldFolder) {
-                    oldFolder = folder;
-                    updateTree();
-                }
-            } catch (Exception e) {
-                // e.printStackTrace();
-            } catch (Error e) {
-                // e.printStackTrace();
-            }
-        }
-    });
-
 
     /**
      * Thread to lex and highlight the text area
@@ -359,8 +332,6 @@ public class FileEditorController {
     public void closeFile(ActionEvent event) {
         // textArea.clear();
         codeArea.clear();
-        folder = null;
-        oldFolder = null;
         resultArea.clear();
         feedback.setText("Everything is cleared.");
         loadedFileReference = null;
@@ -439,6 +410,8 @@ public class FileEditorController {
             }
 
         }
+
+        updateTree();
     }
 
     /**
@@ -491,6 +464,8 @@ public class FileEditorController {
             }
 
         }
+
+        updateTree();
     }
 
     /****************************************************************/
@@ -533,9 +508,6 @@ public class FileEditorController {
                 // set the new tree view
                 treeView.setRoot(newTreeView.getRoot());
                 treeView.setShowRoot(true);
-
-                //set global folder variable
-                folder = path;
 
             } catch (IOException e) {
                 e.printStackTrace();
