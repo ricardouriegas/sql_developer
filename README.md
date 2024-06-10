@@ -38,13 +38,21 @@ La actividad práctica será evaluada en base a los siguientes criterios:
 
 ## Little Instructions to Run
 
-You'll need to install the jar that is on resources on your .m2, that can be do by running the next command:
+You'll need to install this two jar;
+
+* The first one (database_manager) is a library that i made to manage the database, you can find it in the folder sql_gui/dataBaseManager-1.0-SNAPSHOT.jar
+
+* The second one (richtextfx) is a library that i used to make the text area have colors, you can find it in the folder sql_gui/richtextfx-fat-0.11.2.jar
 
 ``` bash
 mvn install:install-file -Dfile=sql_gui/dataBaseManager-1.0-SNAPSHOT.jar -DgroupId=edu.upvictoria.fpoo -DartifactId=database_manager -Dversion=1.0 -Dpackaging=jar
+
+mvn install:install-file -Dfile=/sql_gui/richtextfx-fat-0.11.2.jar -DgroupId=org.fxmisc.richtext -DartifactId=richtextfx -Dversion=0.11.2 -Dpackaging=jar
 ```
 <!-- 
  I execute this bc i do it wherever i want:
 
  mvn install:install-file -Dfile=/home/richy/Documents/sql_gui/sql_gui/dataBaseManager-1.0-SNAPSHOT.jar -DgroupId=edu.upvictoria.fpoo -DartifactId=database_manager -Dversion=1.0 -Dpackaging=jar 
+
+ mvn install:install-file -Dfile=/home/richy/Documents/sql_gui/sql_gui/richtextfx-fat-0.11.2.jar -DgroupId=org.fxmisc.richtext -DartifactId=richtextfx -Dversion=0.11.2 -Dpackaging=jar
  -->

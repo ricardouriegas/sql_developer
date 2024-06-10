@@ -1,0 +1,40 @@
+/* Styles for the text area */
+.keyword {
+    -fx-fill: blue;
+    -fx-font-weight: bold;
+}
+
+.data-type {
+    -fx-fill: black;
+}
+
+.ddl {
+    -fx-fill: blue;
+    -fx-font-weight: bold;
+}
+
+.dml {
+    -fx-fill: blue;
+    -fx-font-weight: bold;
+}
+
+.literal {
+    -fx-fill: green;
+}
+
+.operator {
+    -fx-fill: red;
+}
+
+.others {
+    -fx-fill: blue;
+}
+
+.default {
+    -fx-fill: black;
+}
+
+/* Styles for the window */
+/* .root {
+    -fx-background-color: linear-gradient(to right, rgb(104, 63, 218), rgb(166, 51, 211));
+} */

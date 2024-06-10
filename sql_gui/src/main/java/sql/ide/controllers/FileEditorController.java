@@ -1,32 +1,52 @@
 package sql.ide.controllers;
 
-import javafx.concurrent.ScheduledService;
-import javafx.concurrent.Task;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
-import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
-import javafx.util.Duration;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
-import java.util.concurrent.ExecutionException;
-// import java.util.logging.Logger;
-import java.util.stream.Stream;
-// import static java.util.logging.Level.SEVERE;
-
-//? Import everything related to database classes
-import edu.upvictoria.fpoo.*;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Stream;
+
+import org.fxmisc.richtext.CodeArea;
+import org.fxmisc.richtext.LineNumberFactory;
+import org.fxmisc.richtext.model.StyleSpans;
+import org.fxmisc.richtext.model.StyleSpansBuilder;
+
+// import javafx.scene.control.RichTextFX;
+// import org.fxmisc.richtext.model.Selection;
+
+//* Import everything related to database manager
+import edu.upvictoria.fpoo.*;
+import javafx.application.Platform;
+import javafx.concurrent.ScheduledService;
+import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
+import javafx.util.Duration;
 
 public class FileEditorController {
-    // declare a "global" interpreter
+    // Database manager dependency
     Interpreter interpreter = new Interpreter();
 
+    // File editor variables
     private File loadedFileReference;
     private FileTime lastModifiedTime;
 
@@ -36,16 +56,111 @@ public class FileEditorController {
     @FXML
     private TextArea resultArea = new TextArea();
 
+    @FXML
+    private CodeArea codeArea = new CodeArea();
+
     public Label statusMessage;
     public ProgressBar progressBar;
     public Button loadChangesButton;
-    public TextArea textArea;
+    // public TextArea textArea;
     public Label feedback;
     public Path folder;
+    public Path oldFolder;
+
+    /**
+     * Thread to check for folder path changes
+     */
+    Thread folderThread = new Thread(() -> {
+        while (true) {
+            try {
+                Thread.sleep(500);
+                if (folder != oldFolder) {
+                    oldFolder = folder;
+                    updateTree();
+                }
+            } catch (Exception e) {
+                // e.printStackTrace();
+            } catch (Error e) {
+                // e.printStackTrace();
+            }
+        }
+    });
+
+
+    /**
+     * Thread to lex and highlight the text area
+     */
+    Thread lexerThread = new Thread(() -> {
+        while (true) {
+            try {
+                Thread.sleep(500);
+                String text = codeArea.getText();
+                Platform.runLater(() -> {
+                    StyleSpans<Collection<String>> spans = computeHighlighting(text);
+                    codeArea.setStyleSpans(0, spans);
+                });
+            } catch (Exception e) {
+                // e.printStackTrace();
+            } catch (Error e) {
+                // e.printStackTrace();
+            }
+        }
+    });
+
+    /**
+     * Compute the highlighting for the text area
+     * 
+     * @param text
+     * @return
+     */
+    private StyleSpans<Collection<String>> computeHighlighting(String text) {
+        Lexer lexer = new Lexer(text);
+        List<Token> tokens = lexer.scanTokens();
+
+        StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
+        int lastPos = 0;
+
+        for (Token token : tokens) {
+            String style = switch (token.type) {
+                case NUMBER_DATA_TYPE, BOOLEAN_DATA_TYPE, DATE_DATA_TYPE, STRING_DATA_TYPE -> "data-type";
+                case CREATE, DROP, USE -> "ddl";
+                case SELECT, INSERT, UPDATE, DELETE -> "dml";
+                case WHERE, FROM, ORDER, BY, LIMIT, VALUES, INTO, AND, OR, NOT, NULL, TRUE, FALSE, PRIMARY, KEY,
+                        DATABASE, TABLE, ASC, DESC, SET, UNIQUE, AS, GROUP, IS, PIPE_PIPE -> "keyword";
+                case NUMBER, STRING, IDENTIFIER -> "literal";
+                case LEFT_PAREN, RIGHT_PAREN, COMMA, MINUS, PLUS, SLASH, STAR, SEMICOLON, MOD, DIV, UCASE, LCASE,
+                        CAPITALIZE, FLOOR, ROUND, RAND, COUNT, DISTINCT, MIN, MAX, SUM, AVG, CEIL -> "operator";
+                case BANG_EQUAL, BANG, EQUAL_EQUAL, EQUAL, PORCENTAJE, LESS_EQUAL, LESS, GREATER_EQUAL, GREATER -> "operator";
+                case SHOW, TABLES -> "others";
+                case EOF -> "eof";
+            };
+            
+            /**
+             * TODO: change the EOF start and end on the database library
+             */
+            if (token.type == TokenType.EOF) {
+                return spansBuilder.create();
+            }
+
+            if (token.start > lastPos) {
+                spansBuilder.add(Collections.emptyList(), token.start - lastPos);
+            }
+
+            spansBuilder.add(Collections.singleton(style), token.end - token.start);
+            lastPos = token.end;
+        }
+
+        return spansBuilder.create();
+    }
 
     public void initialize() {
         loadChangesButton.setVisible(false); // hide load changes button
-        textArea.setPromptText("SQL code goes here..."); // placeholder text
+        // codeArea.setPromptText("SQL code goes here..."); // placeholder text
+        codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea)); // line numbers
+        codeArea.replaceText("\n");
+        // todo: place holder for codearea
+        lexerThread.setDaemon(true);
+        lexerThread.start(); // set thread as daemon
     }
 
     /**
@@ -113,21 +228,32 @@ public class FileEditorController {
         // loaded file reference
         loadFileTask.setOnSucceeded(workerStateEvent -> {
             try {
-                textArea.setText(loadFileTask.get());
+                // textArea.setText(loadFileTask.get());
+                codeArea.replaceText(loadFileTask.get());
                 statusMessage.setText("File loaded: " + fileToLoad.getName());
                 loadedFileReference = fileToLoad;
                 lastModifiedTime = Files.readAttributes(fileToLoad.toPath(), BasicFileAttributes.class)
                         .lastModifiedTime();
             } catch (InterruptedException | ExecutionException | IOException e) {
                 // Logger.getLogger(getClass().getName()).log(SEVERE, null, e);
-                textArea.setText("Could not load file from:\n " + fileToLoad.getAbsolutePath());
+                // textArea.setText("Could not load file from:\n " +
+                // fileToLoad.getAbsolutePath());
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("An error occurred");
+                alert.setContentText("Could not load file from:\n " + fileToLoad.getAbsolutePath());
+                alert.showAndWait();
+
+                codeArea.clear();
             }
             scheduleFileChecking(loadedFileReference);
         });
         // If unsuccessful, set text area with error message and status message to
         // failed
         loadFileTask.setOnFailed(workerStateEvent -> {
-            textArea.setText("Could not load file from:\n " + fileToLoad.getAbsolutePath());
+            // textArea.setText("Could not load file from:\n " +
+            // fileToLoad.getAbsolutePath());
+            codeArea.clear();
             statusMessage.setText("Failed to load file");
         });
         return loadFileTask;
@@ -214,7 +340,8 @@ public class FileEditorController {
 
             }
             FileWriter myWriter = new FileWriter(loadedFileReference);
-            myWriter.write(textArea.getText());
+            // myWriter.write(textArea.getText());
+            myWriter.write(codeArea.getText());
             myWriter.close();
             lastModifiedTime = FileTime.fromMillis(System.currentTimeMillis() + 3000);
             System.out.println("Successfully wrote to the file.");
@@ -230,7 +357,11 @@ public class FileEditorController {
      * @param event
      */
     public void closeFile(ActionEvent event) {
-        textArea.clear();
+        // textArea.clear();
+        codeArea.clear();
+        folder = null;
+        oldFolder = null;
+        resultArea.clear();
         feedback.setText("Everything is cleared.");
         loadedFileReference = null;
         loadChangesButton.setVisible(false);
@@ -243,6 +374,17 @@ public class FileEditorController {
      */
     public void exitApplication(ActionEvent event) {
         // TODO: verify if file is saved before exiting
+        // close the thread
+        lexerThread.interrupt();
+        System.exit(0);
+    }
+
+    /**
+     * Exit application when button close is clicked
+     * @param event
+     */
+    public void closeApplication() {
+        lexerThread.interrupt();
         System.exit(0);
     }
 
@@ -253,7 +395,8 @@ public class FileEditorController {
      */
     public void runQuery(ActionEvent event) {
         // get selected text
-        String selectedText = textArea.getSelectedText();
+        // String selectedText = textArea.getSelectedText();
+        String selectedText = codeArea.getSelectedText();
 
         // verify if text is empty (no query selected)
         if (selectedText.isEmpty()) {
@@ -281,8 +424,7 @@ public class FileEditorController {
                     resultArea.appendText("\n-----------------\n");
                 }
 
-            } 
-            catch (Error e) {
+            } catch (Error e) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Error");
                 alert.setHeaderText("An error occurred");
@@ -301,11 +443,13 @@ public class FileEditorController {
 
     /**
      * Run all queries in text area
+     * 
      * @param event
      */
     public void runFile(ActionEvent event) {
         // get all text
-        String allText = textArea.getText();
+        // String allText = textArea.getText();
+        String allText = codeArea.getText();
 
         // verify if text is empty (no query selected)
         if (allText.isEmpty()) {
@@ -367,7 +511,7 @@ public class FileEditorController {
                 // create a new tree item to hold the csv files
                 TreeItem<String> root = new TreeItem<>(path.toString());
                 root.setExpanded(true);
-                
+
                 // read the first line of every csv file to get the columns
                 for (String csvFile : csvFiles) {
                     try (BufferedReader reader = new BufferedReader(new FileReader(path.toString() + "/" + csvFile))) {
@@ -382,13 +526,16 @@ public class FileEditorController {
                         e.printStackTrace();
                     }
                 }
-                
+
                 // create a new tree view bc the old one is immutable
                 TreeView<String> newTreeView = new TreeView<>(root);
 
                 // set the new tree view
                 treeView.setRoot(newTreeView.getRoot());
                 treeView.setShowRoot(true);
+
+                //set global folder variable
+                folder = path;
 
             } catch (IOException e) {
                 e.printStackTrace();
