@@ -71,7 +71,8 @@ public class FileEditorController {
                 String text = codeArea.getText();
                 Platform.runLater(() -> {
                     StyleSpans<Collection<String>> spans = computeHighlighting(text);
-                    codeArea.setStyleSpans(0, spans);
+                    if (spans != null)
+                        codeArea.setStyleSpans(0, spans);
                 });
             } catch (Exception e) {
                 // e.printStackTrace();
@@ -99,7 +100,7 @@ public class FileEditorController {
         } catch (Error e) {
             // if the lexer returns an error, show it to the user
             feedback.setText(e.getMessage());
-            return spansBuilder.create();
+            return null;
         }
 
         // clear the issue field
@@ -120,13 +121,6 @@ public class FileEditorController {
                 case SHOW, TABLES -> "others";
                 default -> "default";
             };
-            
-            /**
-             * TODO: change the EOF start and end on the database library
-             */
-            if (token.type == TokenType.EOF) {
-                return spansBuilder.create();
-            }
 
             if (token.start > lastPos) {
                 spansBuilder.add(Collections.emptyList(), token.start - lastPos);
@@ -143,7 +137,7 @@ public class FileEditorController {
         loadChangesButton.setVisible(false); // hide load changes button
         // codeArea.setPromptText("SQL code goes here..."); // placeholder text
         codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea)); // line numbers
-        codeArea.replaceText("\n");
+        // codeArea.replaceText("\n");
         // todo: place holder for codearea
         lexerThread.setDaemon(true);
         lexerThread.start(); // set thread as daemon
