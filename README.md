@@ -49,6 +49,9 @@ mvn install:install-file -Dfile=sql_gui/dataBaseManager-1.0-SNAPSHOT.jar -Dgroup
 
 mvn install:install-file -Dfile=/sql_gui/richtextfx-fat-0.11.2.jar -DgroupId=org.fxmisc.richtext -DartifactId=richtextfx -Dversion=0.11.2 -Dpackaging=jar
 ```
+
+Special thanks to [RichTextFX](https://github.com/FXMisc/RichTextFX) for the library that i used to make the text area have colors and at the same time be 
+able of run what the user selects.
 <!-- 
  I execute this bc i do it wherever i want:
 

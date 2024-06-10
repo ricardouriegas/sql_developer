@@ -89,10 +89,22 @@ public class FileEditorController {
      */
     private StyleSpans<Collection<String>> computeHighlighting(String text) {
         Lexer lexer = new Lexer(text);
-        List<Token> tokens = lexer.scanTokens();
-
         StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
         int lastPos = 0;
+        List<Token> tokens = null;
+        
+        try {
+            // scan tokens
+            tokens = lexer.scanTokens();
+        } catch (Error e) {
+            // if the lexer returns an error, show it to the user
+            feedback.setText(e.getMessage());
+            return spansBuilder.create();
+        }
+
+        // clear the issue field
+        feedback.setText("");
+
 
         for (Token token : tokens) {
             String style = switch (token.type) {
@@ -106,7 +118,7 @@ public class FileEditorController {
                         CAPITALIZE, FLOOR, ROUND, RAND, COUNT, DISTINCT, MIN, MAX, SUM, AVG, CEIL -> "operator";
                 case BANG_EQUAL, BANG, EQUAL_EQUAL, EQUAL, PORCENTAJE, LESS_EQUAL, LESS, GREATER_EQUAL, GREATER -> "operator";
                 case SHOW, TABLES -> "others";
-                case EOF -> "eof";
+                default -> "default";
             };
             
             /**
