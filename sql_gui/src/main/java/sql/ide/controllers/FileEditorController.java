@@ -333,6 +333,7 @@ public class FileEditorController {
         } catch (IOException e) {
             // Logger.getLogger(getClass().getName()).log(SEVERE, null, e);
             System.out.println("An error occurred while saving the file.");
+            // TODO: add alert
         }
     }
 

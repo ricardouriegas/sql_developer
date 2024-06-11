@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="sql.ide.controllers.ModelerController">
+    <top>
+        <MenuBar>
+            <menus>
+                <Menu text="File">
+                    <MenuItem text="Import SQL" fx:onAction="#importFile" />
+                    <MenuItem text="Export to SQL" fx:onAction="#exportFile" />
+                    <MenuItem text="Return to SQL Developer" fx:onAction="#returnDeveloper" />
+                    <MenuItem text="Exit" fx:onAction="#exitApplication" />
+                </Menu>
+            </menus>
+        </MenuBar>
+    </top>
+    <left>
+        <TreeView>
+            <rootItems>
+                <TreeItem text="Shapes">
+                    <children>
+                        <TreeItem text="Rectangle" fx:onAction="#addRectangle" />
+                        <TreeItem text="Circle" fx:onAction="#addCircle" />
+                        <TreeItem text="Line" fx:onAction="#addLine" />
+                    </children>
+                </TreeItem>
+            </rootItems>
+        </TreeView>
+    </left>
+    <center>
+        <Canvas fx:id="canva" onMousePressed="#handleMousePressed" 
+                onMouseDragged="#handleMouseDragged"
+                onMouseReleased="#handleMouseReleased" />
+    </center>
+</BorderPane>
