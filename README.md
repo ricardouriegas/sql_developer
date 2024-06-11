@@ -1,4 +1,4 @@
-# SQL GUI (Developer & Modeler)
+# SQL GUI (Developer)
 
 ## Little Instructions to Run
 
