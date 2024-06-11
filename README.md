@@ -11,7 +11,7 @@ You'll need to install this two jar;
 ``` bash
 mvn install:install-file -Dfile=sql_gui/dataBaseManager-1.0-SNAPSHOT.jar -DgroupId=edu.upvictoria.fpoo -DartifactId=database_manager -Dversion=1.0 -Dpackaging=jar
 
-mvn install:install-file -Dfile=/sql_gui/richtextfx-fat-0.11.2.jar -DgroupId=org.fxmisc.richtext -DartifactId=richtextfx -Dversion=0.11.2 -Dpackaging=jar
+mvn install:install-file -Dfile=sql_gui/richtextfx-fat-0.11.2.jar -DgroupId=org.fxmisc.richtext -DartifactId=richtextfx -Dversion=0.11.2 -Dpackaging=jar
 ```
 
 Special thanks to [RichTextFX](https://github.com/FXMisc/RichTextFX) for the library that i used to make the text area have colors and at the same time be 

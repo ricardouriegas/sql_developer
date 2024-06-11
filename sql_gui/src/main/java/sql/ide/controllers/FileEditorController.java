@@ -17,6 +17,9 @@ import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -28,6 +31,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 
 
@@ -177,6 +181,26 @@ public class FileEditorController {
         Task<String> loadTask = fileLoaderTask(fileToLoad);
         progressBar.progressProperty().bind(loadTask.progressProperty());
         loadTask.run();
+    }
+
+    /**
+     * Change to the ModelerEditor.fxml
+     * @throws IOException 
+     */
+    @FXML
+    public void changeToModeler(ActionEvent event) throws IOException {
+        lexerThread.interrupt();
+        
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/sql/ide/fxml/ModelerEditor.fxml"));
+        Parent root = loader.load();
+        
+        Stage stage = new Stage();
+        stage.setTitle("Modeler Editor");
+        stage.setScene(new Scene(root));
+        stage.show();
+        // close window
+        ((Stage) ((Pane) codeArea.getParent()).getScene().getWindow()).close();
+
     }
 
     /**

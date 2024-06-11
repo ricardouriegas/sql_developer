@@ -37,22 +37,53 @@
 
 .root {
     -fx-background-color: linear-gradient(to right, rgb(241, 252, 255), rgb(225, 241, 252));
-    -fx-text-fill: white;
-}
-
-.code-area {
-    -fx-background-color: transparent;
     -fx-text-fill: black;
 }
-    
-.transparent-hbox {
+.menu-bar, .menu, .label, .progress-bar, .text-area, .code-area {
     -fx-background-color: transparent;
-}
-
-.vbox {
-    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-background-radius: 0;
 }
 
 .menu-bar {
+    -fx-background-color: linear-gradient(to right, rgb(197, 184, 233), rgb(234, 213, 241));
+}
+
+/* Tree View styling */
+.tree-view {
+    -fx-background-color: transparent;
+    -fx-control-inner-background: transparent;
+}
+
+.tree-view .tree-cell {
+    -fx-text-fill: black;
+}
+
+/* Button styling */
+.button {
+    -fx-background-color: linear-gradient(to right, rgb(146, 124, 207), rgb(247, 145, 230));
+    -fx-text-fill: white;
+    -fx-border-radius: 5; /* Rounded border */
+    -fx-border-color: rgb(143, 114, 221); /* Border color to match the background */
+}
+
+/* Text Area Styling*/
+.text-area {
+    -fx-background-color: transparent;
+    -fx-control-inner-background: transparent;
+    -fx-background-insets: 0;
+    -fx-background-radius: 0;
+    -fx-text-fill: black;
+}
+
+.text-area .content {
+    -fx-background-color: transparent;
+}
+
+.text-area .scroll-pane {
+    -fx-background-color: transparent;
+}
+
+.text-area .viewport {
     -fx-background-color: transparent;
 }

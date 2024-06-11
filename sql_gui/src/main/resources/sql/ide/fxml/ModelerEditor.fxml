@@ -4,36 +4,27 @@
 
 <?import javafx.scene.layout.*?>
 
+<?import javafx.scene.canvas.Canvas?>
+
 <BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
     fx:controller="sql.ide.controllers.ModelerController">
     <top>
         <MenuBar>
             <menus>
                 <Menu text="File">
-                    <MenuItem text="Import SQL" fx:onAction="#importFile" />
-                    <MenuItem text="Export to SQL" fx:onAction="#exportFile" />
-                    <MenuItem text="Return to SQL Developer" fx:onAction="#returnDeveloper" />
-                    <MenuItem text="Exit" fx:onAction="#exitApplication" />
+                    <MenuItem text="Import SQL" onAction="#importFile" />
+                    <MenuItem text="Export to SQL" onAction="#exportFile" />
+                    <MenuItem text="Return to SQL Developer" onAction="#returnDeveloper" />
+                    <MenuItem text="Exit" onAction="#exitApplication" />
                 </Menu>
             </menus>
         </MenuBar>
     </top>
     <left>
-        <TreeView>
-            <rootItems>
-                <TreeItem text="Shapes">
-                    <children>
-                        <TreeItem text="Rectangle" fx:onAction="#addRectangle" />
-                        <TreeItem text="Circle" fx:onAction="#addCircle" />
-                        <TreeItem text="Line" fx:onAction="#addLine" />
-                    </children>
-                </TreeItem>
-            </rootItems>
-        </TreeView>
+        <TreeView fx:id="treeView"/>
     </left>
     <center>
-        <Canvas fx:id="canva" onMousePressed="#handleMousePressed" 
-                onMouseDragged="#handleMouseDragged"
-                onMouseReleased="#handleMouseReleased" />
-    </center>
-</BorderPane>
+        <Canvas fx:id="canva" width="800" height="600" />
+        <!-- onMousePressed="#handleMousePressed" onMouseDragged="#handleMouseDragged" onMouseReleased="#handleMouseReleased" /> -->
+    </center> 
+</BorderPane> 
